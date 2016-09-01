@@ -17,7 +17,7 @@ from galicaster.core import context
 from galicaster.core.core import PAGES
 from galicaster.classui import get_ui_path, get_image_path
 
-import galicaster.utils.pysca as pysca
+import pysca
 
 from gi.repository import Gtk, Gdk, GObject, Pango, GdkPixbuf
 
