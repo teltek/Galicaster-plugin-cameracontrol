@@ -18,14 +18,14 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version='0.0.1',
 
-    description='Plugin to control Sony EVI-H100S/H100V',
+    description='Plugin to control Sony EVI-H100S/H100V using galicaster',
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/teltek/Galicaster',
+    url='https://github.com/teltek/Galicaster-plugin-cameracontrol',
 
     # Choose your license
-    license='MIT',
+    license='CC BY-NC-SA',
 
 
     # You can just specify the packages manually here if your project is
