@@ -13,6 +13,10 @@ This plugin can be installed as a deb package or through pip installer:
 
 		or execute ``python setup.py sdist`` to generate a .tar package installable from pip
 
+Galicaster controls the camera using the serial port, so we need to add the user galicaster to the group dialout, like follows (otherwise galicaster would need root privileges):
+
+``sudo usermod -a -G dialout galicaster``
+
 Also it's necessary to add this lines to conf.ini in galicaster folder to run the plugin properly:
 ::
 
