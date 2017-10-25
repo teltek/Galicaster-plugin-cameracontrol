@@ -1,7 +1,7 @@
-# -*- coding:utf-8 -*-
+# -*- coding:utf-8 -*
 # Galicaster, Multistream Recorder and Player
 #
-#       galicaster/plugins/cameracontrol
+#       galicaster_plugin_cameracontrol/cameracontrol
 #
 # Copyright (c) 2016, Teltek Video Research <galicaster@teltek.es>
 #
@@ -13,11 +13,9 @@
 
 import Queue
 
+from os import path
 from galicaster.core import context
 from galicaster.core.core import PAGES
-from galicaster.classui import get_ui_path, get_image_path
-
-import pysca
 
 from gi.repository import Gtk, Gdk, GObject, Pango, GdkPixbuf
 
@@ -29,21 +27,17 @@ conf = None
 logger = None
 jobs = None
 event_handler = None
+cam_ctrl = None
 
 def init():
-    global conf, logger, event_handler, jobs
+    global conf, logger, event_handler, jobs, cam_ctrl
     dispatcher = context.get_dispatcher()
     conf = context.get_conf()
     logger = context.get_logger()
+    camera = conf.get('cameracontrol','camera')
 
-    path = conf.get('cameracontrol','path')
-    pysca.connect(path)
-    pysca.set_zoom(1,0)
-    pysca.pan_tilt_home(1)
-    dispatcher.connect('init',load_ui)
-    pysca.osd_off(1)
-    logger.info("Cam connected")
-
+    cam = __import__(camera, globals())
+    cam_ctrl = cam.Controls()
 
     icons = ["left","right","up1","down1","up_right","up_left","down_left","down_right","plus","minus"]
     icontheme = Gtk.IconTheme()
@@ -51,6 +45,7 @@ def init():
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(get_image_path(name+".svg"))
         icontheme.add_builtin_icon(name,20,pixbuf)
 
+    dispatcher.connect('init',load_ui)
     dispatcher.connect("action-key-press", on_key_press)
     dispatcher.connect("action-key-release", on_key_release)
 
@@ -86,15 +81,13 @@ def load_ui(element):
     notebook.append_page(notebook2,label)
     builder.connect_signals(event_handler)
 
-    zoom_levels = conf.get_int('cameracontrol','zoom_levels')
-    max_speed_pan_tilt = conf.get('cameracontrol','max_speed_pan_tilt')
     speed_zoom = builder.get_object("adjustment1")
     speed_pan_tilt = builder.get_object("adjustment2")
-    speed_zoom.set_upper(zoom_levels)
-    speed_pan_tilt.set_upper(int(max_speed_pan_tilt,16))
+    speed_zoom.set_upper(100)
+    speed_pan_tilt.set_upper(100)
 
-    speed_pan_tilt.set_value(int(max_speed_pan_tilt,16)/2)
-    speed_zoom.set_value(zoom_levels/2)
+    speed_pan_tilt.set_value(50)
+    speed_zoom.set_value(50)
 
     grid = builder.get_object("grid1")
     size = context.get_mainwindow().get_size()
@@ -132,8 +125,11 @@ def label_style(label, only_text=None, fsize=20):
     label.modify_font(Pango.FontDescription(str(int(k1*fsize))))
     return label
 
+pressed = False
 def on_key_press(element, source, event):
-    if context.get_mainwindow().get_current_page() == PAGES["REC"]:
+    global pressed
+    if context.get_mainwindow().get_current_page() == PAGES["REC"] and not pressed:
+        pressed = True
         if event.keyval == Gdk.keyval_from_name("Up"):
             logger.debug("Key pressed: up")
             event_handler.on_up()
@@ -160,9 +156,11 @@ def on_key_press(element, source, event):
 
 
 def on_key_release(element, source, event):
+    global pressed
     if event.keyval == Gdk.keyval_from_name("Up") or event.keyval == Gdk.keyval_from_name("Right") or event.keyval == Gdk.keyval_from_name("Down") \
        or event.keyval == Gdk.keyval_from_name("Left") or event.keyval == Gdk.keyval_from_name("plus") or event.keyval == Gdk.keyval_from_name("minus"):
         event_handler.on_release()
+        pressed = False
 
 
 zoom_speed = 0
@@ -171,7 +169,18 @@ move_speed = 0
 class Handler:
     def on_press(self, *args):
         global logger
-        movements = {"up":self.on_up,"down":self.on_down,"left":self.on_left,"right":self.on_right,"up_left":self.on_up_left,"up_right":self.on_up_right,"down_left":self.on_down_left,"down_right":self.on_down_right,"zoom_in":self.zoom_in,"zoom_out":self.zoom_out}
+        movements = {
+            "up":self.on_up,
+            "down":self.on_down,
+            "left":self.on_left,
+            "right":self.on_right,
+            "up_left":self.on_up_left,
+            "up_right":self.on_up_right,
+            "down_left":self.on_down_left,
+            "down_right":self.on_down_right,
+            "zoom_in":self.zoom_in,
+            "zoom_out":self.zoom_out
+        }
         movement = args[0].get_name()
         logger.debug("Button pressed: "+movement)
         self._repeat = True
@@ -179,56 +188,70 @@ class Handler:
         GObject.timeout_add(timeout, movements[movement])
 
     def on_release(self, *args):
-        jobs.put((pysca.clear_commands, (1,)))
-        jobs.put((pysca.zoom, (1, "stop")))
         self._repeat = False
+        jobs.queue.clear()
+        jobs.put((cam_ctrl.move_stop, ()))
 
     def on_up(self, *args):
-        jobs.put((pysca.pan_tilt, (1,0,move_speed)))
+        jobs.put((cam_ctrl.move, ("up", move_speed)))
 
     def on_right(self, *args):
-        jobs.put((pysca.pan_tilt, (1,move_speed,0)))
+        jobs.put((cam_ctrl.move, ("right", move_speed)))
 
     def on_down(self, *args):
-        jobs.put((pysca.pan_tilt, (1,0,-move_speed)))
+        jobs.put((cam_ctrl.move, ("down", move_speed)))
 
     def on_left(self, *args):
-        jobs.put((pysca.pan_tilt, (1,-move_speed,0)))
+        jobs.put((cam_ctrl.move, ("left", move_speed)))
 
     def on_up_left(self):
-        jobs.put((pysca.pan_tilt, (1,-move_speed,move_speed-2)))
+        jobs.put((cam_ctrl.move, ("up_left", move_speed)))
 
     def on_up_right(self):
-        jobs.put((pysca.pan_tilt, (1,move_speed,move_speed-2)))
+        jobs.put((cam_ctrl.move, ("up_right",move_speed)))
 
     def on_down_left(self):
-        jobs.put((pysca.pan_tilt, (1,-move_speed,-move_speed+2)))
+        jobs.put((cam_ctrl.move, ("down_left", move_speed)))
 
     def on_down_right(self):
-        jobs.put((pysca.pan_tilt, (1,move_speed,-move_speed+2)))
+        jobs.put((cam_ctrl.move, ("down_right", move_speed)))
 
     def on_load_presets(self, *args):
-        preset = args[0].get_name().split(" ")[1]
-        jobs.put((pysca.recall_memory, (1,preset)))
-        logger.debug("Load camera preset: "+preset)
+        preset = int(args[0].get_name().split(" ")[1])
+        jobs.put((cam_ctrl.load_preset, (preset,)))
+        logger.debug("Load camera preset: {}".format(preset))
 
     def on_save_presets(self, *args):
-        preset = args[0].get_name().split(" ")[1]
-        jobs.put((pysca.set_memory, (1,preset)))
-        logger.debug("Save camera preset: "+preset)
+        preset = int(args[0].get_name().split(" ")[1])
+        jobs.put((cam_ctrl.set_preset, (preset, )))
+        logger.debug("Save camera preset: {}".format(preset))
 
     def zoom_in(self, *args):
-        jobs.put((pysca.zoom, (1,"tele",zoom_speed)))
+        jobs.put((cam_ctrl.zoom, ("tele", zoom_speed)))
 
     def zoom_out(self, *args):
-        jobs.put((pysca.zoom, (1,"wide",zoom_speed)))
+        jobs.put((cam_ctrl.zoom, ("wide", zoom_speed)))
 
     def on_zoom_speed(self, *args):
         global zoom_speed
-        zoom_speed = args[0].get_value()
-        logger.debug("Zoom speed set to: "+str(zoom_speed))
+        zoom_speed = int(args[0].get_value())
+        logger.debug("Zoom speed set to: {}".format(zoom_speed))
 
     def on_move_speed(self, *args):
         global move_speed
-        move_speed = args[0].get_value()
-        logger.debug("Pan/Tilt speed set to: "+str(move_speed))
+        move_speed = int(args[0].get_value())
+        logger.debug("Pan/Tilt speed set to: {}".format(move_speed))
+
+def get_ui_path(ui_file=""):
+    """Retrieve the path to the folder where glade UI files are stored.
+    If a file name is provided, the path will be for the file
+    """
+    data_dir = path.abspath(path.join(path.dirname(__file__), "resources/ui"))
+    return path.join(data_dir, ui_file)
+
+def get_image_path(image_file=""):
+    """Retrieve the path to the folder where images are stored.
+    If a file name is provided, the path will be for the file
+    """
+    data_dir = path.abspath(path.join(path.dirname(__file__), "resources/images"))
+    return path.join(data_dir, image_file)
