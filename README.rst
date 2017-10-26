@@ -37,11 +37,11 @@ Configuration examples
 Sony EVI-H100S/100V
 -------------------
 
-Galicaster controls the camera using the serial port, so we need to add the user galicaster to the group dialout, like follows (otherwise galicaster would need root privileges):
+Galicaster controls the camera using the serial port, so we need to add the user galicaster to the group dialout, as follows (otherwise galicaster would need root privileges):
 
 ``sudo usermod -a -G dialout galicaster``
 
-Also it's necessary to add this lines to ``conf.ini`` in galicaster folder to run the plugin properly:
+The following lines must also be added to the ``conf.ini`` file so that the plugin runs properly:
 ::
 	[plugins]
 	cameracontrol = True
