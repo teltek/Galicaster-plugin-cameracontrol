@@ -31,14 +31,14 @@ class Controls:
     def move(self, direction, speed_percent):
         speed = (self.max_speed_pan_tilt*speed_percent)/100
         directions = {
-            "right" : [speed+50, 50],
-            "left" : [-(speed-50), 50],
-            "down" : [50, -(speed-50)],
-            "up" : [50, speed+50],
-            "up_right" : [speed+50, speed+50],
-            "down_right" : [speed+50, -(speed-50)],
-            "down_left" : [-(speed-50), -(speed-50)],
-            "up_left" : [-(speed-50), speed+50]
+            "right" : (speed+50, 50),
+            "left" : (-(speed-50), 50),
+            "down" : (50, -(speed-50)),
+            "up" : (50, speed+50),
+            "up_right" : (speed+50, speed+50),
+            "down_right" : (speed+50, -(speed-50)),
+            "down_left" : (-(speed-50), -(speed-50)),
+            "up_left" : (-(speed-50), speed+50)
         }
         self.send_cmd("#PTS{:02}{:02}".format(directions[direction][0], directions[direction][1]))
 

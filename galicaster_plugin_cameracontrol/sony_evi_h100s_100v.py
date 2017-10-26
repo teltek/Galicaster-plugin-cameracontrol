@@ -31,14 +31,14 @@ class Controls:
     def move(self, direction, speed_percent):
         speed = (self.max_speed_pan_tilt*speed_percent)/100
         directions = {
-            "right" : [speed, 0],
-            "left" : [-speed, 0],
-            "down" : [0, -speed],
-            "up" : [0, speed],
-            "up_right" : [speed, speed-2],
-            "down_right" : [speed, -speed+2],
-            "down_left" : [-speed, -speed+2],
-            "up_left" : [-speed, speed-2]
+            "right" : (speed, 0),
+            "left" : (-speed, 0),
+            "down" : (0, -speed),
+            "up" : (0, speed),
+            "up_right" : (speed, speed-2),
+            "down_right" : (speed, -speed+2),
+            "down_left" : (-speed, -speed+2),
+            "up_left" : (-speed, speed-2)
         }
         pysca.pan_tilt(1,directions[direction][0], directions[direction][1])
 
