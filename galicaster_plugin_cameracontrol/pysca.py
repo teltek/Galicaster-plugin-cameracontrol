@@ -695,7 +695,7 @@ def __reader():
                         # Read the packet
                         #print "__READER READ PACKET"
                         p = Packet.from_serial(__serialport)
-                        print "Received packet:", p
+                        # print "Received packet:", p
 
                         # Check the response according to several types
                         if p.header == VISCA_BCAST_HEADER:
@@ -790,7 +790,7 @@ def __send(recipient, *payload):
                 # Relay the request to the corresponding "device"
                 request = Packet.from_parts(0, recipient, *payload)
 
-                print "Sending packet {}".format(request)
+                # print "Sending packet {}".format(request)
 
                 # Only one request at a time: block till the device allows us to go
                 __devices[recipient].block_send()
