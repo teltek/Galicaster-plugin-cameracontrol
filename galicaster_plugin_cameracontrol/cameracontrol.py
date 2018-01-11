@@ -129,31 +129,35 @@ pressed = False
 def on_key_press(element, source, event):
     global pressed
     if context.get_mainwindow().get_current_page() == PAGES["REC"] and not pressed:
-        pressed = True
         if event.keyval == Gdk.keyval_from_name("Up"):
+            pressed = True
             logger.debug("Key pressed: up")
             event_handler.on_up()
 
         if event.keyval == Gdk.keyval_from_name("Right"):
+            pressed = True
             logger.debug("Key pressed: right")
             event_handler.on_right()
 
         if event.keyval == Gdk.keyval_from_name("Down"):
+            pressed = True
             logger.debug("Key pressed: down")
             event_handler.on_down()
 
         if event.keyval == Gdk.keyval_from_name("Left"):
+            pressed = True
             logger.debug("Key pressed: left")
             event_handler.on_left()
 
         if event.keyval == Gdk.keyval_from_name("plus"):
+            pressed = True
             logger.debug("Key pressed: zoom_in")
             event_handler.zoom_in()
 
         if event.keyval == Gdk.keyval_from_name("minus"):
+            pressed = True
             logger.debug("Key pressed: zoom_out")
             event_handler.zoom_out()
-
 
 def on_key_release(element, source, event):
     global pressed
