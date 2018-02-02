@@ -28,7 +28,7 @@ import Queue
 # Timeout for read and write, in seconds
 # TODO: More timeouts?
 PORT_TIMEOUT = 5
-RESPONSE_TIMEOUT = 30
+RESPONSE_TIMEOUT = 5
 
 # This is the default "offset" for the 'set address' command.
 # According to the H-100 documentation, it is always one.

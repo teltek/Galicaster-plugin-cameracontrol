@@ -163,7 +163,7 @@ def on_key_release(element, source, event):
     global pressed
     if event.keyval == Gdk.keyval_from_name("Up") or event.keyval == Gdk.keyval_from_name("Right") or event.keyval == Gdk.keyval_from_name("Down") \
        or event.keyval == Gdk.keyval_from_name("Left") or event.keyval == Gdk.keyval_from_name("plus") or event.keyval == Gdk.keyval_from_name("minus"):
-        event_handler.on_release()
+        event_handler.on_release(Gdk.keyval_name(event.keyval))
         pressed = False
 
 
@@ -194,7 +194,11 @@ class Handler:
     def on_release(self, *args):
         self._repeat = False
         jobs.queue.clear()
-        jobs.put((cam_ctrl.move_stop, ()))
+        try:
+            key_release = args[0].get_name()
+        except:
+            key_release =  args[0]
+        jobs.put((cam_ctrl.move_stop, (key_release,)))
 
     def on_up(self, *args):
         jobs.put((cam_ctrl.move, ("up", move_speed)))
