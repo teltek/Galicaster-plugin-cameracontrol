@@ -42,7 +42,7 @@ class Controls:
         }
         self.send_cmd("#PTS{:02}{:02}".format(directions[direction][0], directions[direction][1]))
 
-    def move_stop(self):
+    def move_stop(self, key):
         self.send_cmd("#PTS5050")
         self.send_cmd("#Z50")
 

@@ -42,9 +42,10 @@ class Controls:
         }
         pysca.pan_tilt(1,directions[direction][0], directions[direction][1])
 
-    def move_stop(self):
+    def move_stop(self, key):
         pysca.clear_commands(1)
-        pysca.zoom(1, "stop")
+        if key in ["minus", "plus", "zoom_in", "zoom_out"]:
+            pysca.zoom(1, "stop")
 
     def zoom(self, zoom, speed_percent):
         speed = (self.max_speed_pan_tilt*speed_percent)/100
