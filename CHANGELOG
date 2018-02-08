@@ -1,0 +1,17 @@
+CHANGELOG
+=========
+
+* 1.0.1 (2018-02-08)
+ * Added python-requests dependence
+ * Fixed keyboard controls
+ * Fixed check of Galicaster version
+ * Fixed some issues with Sony EVI-H100S/100V cameras after multiple short button press
+ * Reduced response timeout in pysca
+
+* 1.0.0 (2018-01-04)
+ * Improved plugin modularity to make more easy to add new cameras
+ * Added Panasonic cameras, series AW-HE50, AW-HE120, AW-HE60, AW-HE130, AW-HE40, AW-HE65, AW-HE70, AW-UE70
+ * Fixed path to glade files
+
+* 0.0.1 (2016-09-01)
+ * Initial version
